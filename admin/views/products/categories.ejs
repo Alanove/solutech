@@ -1,0 +1,38 @@
+<div class="panel panel-inverse">
+  <div class="panel-heading">
+    <h4 class="panel-title">Product categories</h4>
+    <div class="panel-heading-btn">
+      <a href="/admin/product-categories/new/edit" class="btn btn-xs btn-success">Add category</a>
+    </div>
+  </div>
+  <div class="panel-body">
+    <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+    <table class="table table-striped">
+      <thead><tr><th>Picture</th><th>Name</th><th>Slug</th><th>Sort</th><th>Home page</th><th></th></tr></thead>
+      <tbody>
+        <% categories.slice().sort(function(a, b) { return (a.sort || 0) - (b.sort || 0); }).forEach(function(category) { %>
+          <tr>
+            <td>
+              <% if (category.image) { %>
+                <img src="<%= category.image %>" alt="" style="width:60px;height:45px;object-fit:cover;border:1px solid #ddd">
+              <% } else { %>
+                <span class="text-muted">None</span>
+              <% } %>
+            </td>
+            <td><%= category.name %></td>
+            <td><%= category.slug %></td>
+            <td><%= category.sort || 0 %></td>
+            <td><%= category.showOnHome !== false ? 'Yes' : 'No' %></td>
+            <td>
+              <a class="btn btn-xs btn-primary" href="/admin/product-categories/<%= category.slug %>/edit">Edit</a>
+              <form method="post" action="/admin/product-categories/<%= category.slug %>/delete" style="display:inline" onsubmit="return confirm('Delete this category?')">
+                <button class="btn btn-xs btn-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
