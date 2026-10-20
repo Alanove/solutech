@@ -97,12 +97,10 @@ router.post('/api/slider/upload-image', AdminController.requireAuth, SliderContr
 
 // Product catalog
 router.get('/products', AdminController.requireAuth, CatalogController.products);
-router.get('/products/new/edit', AdminController.requireAuth, CatalogController.editProduct);
 router.get('/products/:key/edit', AdminController.requireAuth, CatalogController.editProduct);
 router.post('/products/save', AdminController.requireAuth, CatalogController.saveProduct);
 router.post('/products/:key/delete', AdminController.requireAuth, CatalogController.deleteProduct);
 router.get('/product-categories', AdminController.requireAuth, CatalogController.categories);
-router.get('/product-categories/new/edit', AdminController.requireAuth, CatalogController.editCategory);
 router.get('/product-categories/:slug/edit', AdminController.requireAuth, CatalogController.editCategory);
 router.post('/product-categories/save', AdminController.requireAuth, CatalogController.saveCategory);
 router.post('/product-categories/:slug/delete', AdminController.requireAuth, CatalogController.deleteCategory);
@@ -126,6 +124,7 @@ router.delete('/team/:id', AdminController.requireAuth, TeamController.delete);
 // Site settings management
 router.get('/site-settings', AdminController.requireAuth, SiteSettingsController.siteSettings);
 router.post('/site-settings/update', AdminController.requireAuth, SiteSettingsController.updateSettings);
+router.post('/site-settings/test-email', AdminController.requireAuth, SiteSettingsController.sendTestEmail);
 router.post('/site-settings/test-upload', AdminController.requireAuth, SiteSettingsController.testUpload);
 router.delete('/site-settings/delete-image/:type', AdminController.requireAuth, SiteSettingsController.deleteSiteImage);
 

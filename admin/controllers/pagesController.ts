@@ -650,8 +650,8 @@ export class PagesController {
         // Prepare update data - only include pageImage if it's a valid non-empty string
         const updateData: Partial<Omit<AdminPageData, 'key'>> = {
           title: title.trim(),
-          // Home content is managed by /admin/home sections; never overwrite it from this form
-          content: pageKey === 'home' ? existingPage.content : (content || ''),
+          // Home content is managed by /admin/home sections and the products page by the catalog; never overwrite them from this form
+          content: pageKey === 'home' || existingPage.kind === 'products' ? existingPage.content : (content || ''),
           status: (isActive ? 'published' : 'draft') as 'published' | 'draft',
           includeInMenu: includeInMenu === '1' || includeInMenu === true,
           menuSort: parseInt(menuSort) || 1000,

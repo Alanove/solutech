@@ -98,6 +98,11 @@
 													<% if (page.seo?.pageTitle) { %>
 														<div class="fs-12px text-gray-500-darker"><%= page.seo.pageTitle %></div>
 													<% } %>
+													<% if (page.key === 'home') { %>
+														<div class="fs-12px text-info">Title and SEO only. Content is edited in <a href="/admin/home">Home Page</a>.</div>
+													<% } else if (page.kind === 'products') { %>
+														<div class="fs-12px text-info">Title and SEO only. Items are edited in <a href="/admin/products">Products</a>.</div>
+													<% } %>
 												</div>
 											</div>
 										</td>

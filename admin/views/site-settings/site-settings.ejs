@@ -111,6 +111,31 @@
 					</div>
 
 					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">reCAPTCHA Site Key</label>
+						<div class="col-md-9">
+							<input type="text" class="form-control" id="recaptchaSiteKey" name="recaptchaSiteKey"
+								value="<%= settings.recaptchaSiteKey || '' %>" autocomplete="off" />
+							<small class="fs-12px text-gray-500-darker">Google reCAPTCHA v2 "Invisible" site key, used by the contact forms</small>
+						</div>
+					</div>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">reCAPTCHA Secret Key</label>
+						<div class="col-md-9">
+							<input type="password" class="form-control" id="recaptchaSecretKey" name="recaptchaSecretKey"
+								value="" autocomplete="new-password"
+								placeholder="<%= settings.recaptchaSecretKey ? 'Saved. Leave blank to keep the current secret' : 'Not set' %>" />
+							<% if (settings.recaptchaSecretKey) { %>
+							<div class="form-check mt-1">
+								<input class="form-check-input" type="checkbox" id="clearRecaptchaSecret" name="clearRecaptchaSecret" value="1" />
+								<label class="form-check-label" for="clearRecaptchaSecret">Remove saved secret</label>
+							</div>
+							<% } %>
+							<small class="fs-12px text-gray-500-darker">Contact form messages are rejected until both keys are saved</small>
+						</div>
+					</div>
+
+					<div class="row mb-15px">
 						<label class="form-label col-form-label col-md-3">Contact Phone</label>
 						<div class="col-md-9">
 							<input type="text" class="form-control" id="contactPhone" name="contactPhone"
@@ -151,6 +176,81 @@
 				<!-- END panel-body -->
 			</div>
 			<!-- END panel -->
+
+			<!-- BEGIN panel - Outgoing Mail -->
+			<div class="panel panel-inverse">
+				<div class="panel-heading">
+					<h4 class="panel-title">Outgoing Mail (SMTP)</h4>
+				</div>
+				<div class="panel-body">
+					<p class="text-muted">Used to deliver contact form messages to the Contact Email above. For Resend: host <code>smtp.resend.com</code>, port <code>465</code> with SSL, username <code>resend</code>, password = your Resend API key, and a From address on a domain verified in Resend.</p>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">SMTP Host</label>
+						<div class="col-md-9">
+							<input type="text" class="form-control" id="smtpHost" name="smtpHost"
+								value="<%= settings.smtpHost || '' %>" placeholder="smtp.resend.com" autocomplete="off" />
+						</div>
+					</div>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">Port</label>
+						<div class="col-md-3">
+							<input type="number" class="form-control" id="smtpPort" name="smtpPort"
+								value="<%= settings.smtpPort || 465 %>" />
+						</div>
+						<div class="col-md-6 d-flex align-items-center">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" id="smtpSecure" name="smtpSecure" value="1"
+									<%= (typeof settings.smtpSecure === 'boolean' ? settings.smtpSecure : (Number(settings.smtpPort) || 465) === 465) ? 'checked' : '' %> />
+								<label class="form-check-label" for="smtpSecure">Use SSL (on for port 465, off for 587)</label>
+							</div>
+						</div>
+					</div>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">Username</label>
+						<div class="col-md-9">
+							<input type="text" class="form-control" id="smtpUser" name="smtpUser"
+								value="<%= settings.smtpUser || '' %>" placeholder="resend" autocomplete="off" />
+						</div>
+					</div>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">Password / API Key</label>
+						<div class="col-md-9">
+							<input type="password" class="form-control" id="smtpPass" name="smtpPass"
+								value="" autocomplete="new-password"
+								placeholder="<%= settings.smtpPass ? 'Saved. Leave blank to keep the current password' : 'Not set' %>" />
+							<% if (settings.smtpPass) { %>
+							<div class="form-check mt-1">
+								<input class="form-check-input" type="checkbox" id="clearSmtpPass" name="clearSmtpPass" value="1" />
+								<label class="form-check-label" for="clearSmtpPass">Remove saved password</label>
+							</div>
+							<% } %>
+						</div>
+					</div>
+
+					<div class="row mb-15px">
+						<label class="form-label col-form-label col-md-3">From Address</label>
+						<div class="col-md-9">
+							<input type="text" class="form-control" id="smtpFrom" name="smtpFrom"
+								value="<%= settings.smtpFrom || '' %>" placeholder="Solutec Website &lt;noreply@solutec-lb.com&gt;" />
+							<small class="fs-12px text-gray-500-darker">Must be on a domain verified with your mail provider. Replies go to the visitor's email.</small>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-9 offset-md-3">
+							<button type="submit" class="btn btn-outline-primary btn-sm" formaction="/admin/site-settings/test-email" formenctype="application/x-www-form-urlencoded" formnovalidate>
+								<i class="fa fa-paper-plane me-1"></i> Send test email
+							</button>
+							<small class="fs-12px text-gray-500-darker ms-2">Sends to the Contact Email using the saved settings. Save changes first.</small>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- END panel - Outgoing Mail -->
 
 			<div class="panel panel-inverse">
 				<div class="panel-heading">

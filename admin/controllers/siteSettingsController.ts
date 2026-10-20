@@ -5,6 +5,7 @@ import { AdminMenuService } from '../services/adminMenuService';
 import { SiteSettingsService } from '../services/siteSettingsService';
 import { StorageService } from '../services/storageService';
 import contactInfoService from '../../src/services/contactInfoService';
+import { EmailService } from '../../src/services/emailService';
 import { DATA_PATHS } from '../../src/constants';
 
 const menuService = AdminMenuService.getInstance();
@@ -137,6 +138,22 @@ export class SiteSettingsController {
           updatedSettings.siteUrl = req.body.siteUrl || '';
           updatedSettings.contactEmail = req.body.contactEmail || '';
           updatedSettings.careersEmail = req.body.careersEmail || '';
+          updatedSettings.recaptchaSiteKey = String(req.body.recaptchaSiteKey || '').trim();
+          if (String(req.body.recaptchaSecretKey || '').trim()) {
+            updatedSettings.recaptchaSecretKey = String(req.body.recaptchaSecretKey).trim();
+          } else if (req.body.clearRecaptchaSecret === '1') {
+            updatedSettings.recaptchaSecretKey = '';
+          }
+          updatedSettings.smtpHost = String(req.body.smtpHost || '').trim();
+          updatedSettings.smtpPort = parseInt(String(req.body.smtpPort || ''), 10) || 465;
+          updatedSettings.smtpSecure = req.body.smtpSecure === '1';
+          updatedSettings.smtpUser = String(req.body.smtpUser || '').trim();
+          updatedSettings.smtpFrom = String(req.body.smtpFrom || '').trim();
+          if (String(req.body.smtpPass || '').trim()) {
+            updatedSettings.smtpPass = String(req.body.smtpPass).trim();
+          } else if (req.body.clearSmtpPass === '1') {
+            updatedSettings.smtpPass = '';
+          }
           updatedSettings.contactPhone = req.body.contactPhone || '';
           updatedSettings.fax = req.body.fax || '';
           updatedSettings.address = req.body.address || '';
@@ -230,6 +247,32 @@ export class SiteSettingsController {
     } catch (error) {
       console.error('Error in updateSettings:', error);
       res.redirect('/admin/site-settings?error=An error occurred');
+    }
+  }
+
+  /**
+   * Send a test email to the contact email using the saved mail settings
+   */
+  public static async sendTestEmail(req: Request, res: Response): Promise<void> {
+    const to = siteSettingsService.getContactEmail().trim();
+    if (!to) {
+      res.redirect('/admin/site-settings?error=' + encodeURIComponent('Set a Contact Email first'));
+      return;
+    }
+    try {
+      const result = await EmailService.getInstance().sendMail({
+        to,
+        subject: `[${siteSettingsService.getSiteTitle() || 'Website'}] Test email`,
+        text: 'This is a test email from the website admin. Outgoing mail is working.'
+      });
+      if (!result.delivered) {
+        res.redirect('/admin/site-settings?error=' + encodeURIComponent('Mail is not configured. Fill in the Outgoing Mail settings and save first.'));
+        return;
+      }
+      res.redirect('/admin/site-settings?success=' + encodeURIComponent(`Test email sent to ${to}`));
+    } catch (error: any) {
+      console.error('Test email error:', error);
+      res.redirect('/admin/site-settings?error=' + encodeURIComponent(`Test email failed: ${error?.message || 'unknown error'}`));
     }
   }
 

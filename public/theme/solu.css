@@ -23,7 +23,6 @@
 .solu-price { font-weight: 700; }
 .solu-form { display: grid; gap: 12px; max-width: 560px; }
 .solu-form input, .solu-form textarea { width: 100%; padding: 8px; }
-.wpcf7-form { display: none; }
 .elementor-widget-google_maps .elementor-widget-container { overflow: hidden; }
 .elementor-widget-google_maps .elementor-custom-embed { line-height: 0; }
 .elementor-widget-google_maps iframe { width: 100%; height: 300px; border: 0; }

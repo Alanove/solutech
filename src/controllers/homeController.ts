@@ -3,11 +3,20 @@ import { PagesService } from '../../admin/services/pagesService';
 
 import { NewsService } from '../../admin/services/newsService';
 import { HomeSectionsService } from '../../admin/services/homeSectionsService';
+import { SliderService } from '../../admin/services/sliderService';
 import productsService from '../services/productsService';
 
 const pagesService = PagesService.getInstance();
 const newsService = NewsService.getInstance();
 const homeSectionsService = HomeSectionsService.getInstance();
+const sliderService = SliderService.getInstance();
+
+function getHeroSlides() {
+  sliderService.reloadData();
+  return sliderService.getActiveSlides()
+    .filter((slide) => slide.image?.trim())
+    .map((slide) => ({ ...slide, image: sliderService.getImageUrl(slide.image) }));
+}
 
 export class HomeController {
   public static async index(req: Request, res: Response): Promise<void> {
@@ -26,6 +35,7 @@ export class HomeController {
       res.render('index', {
         pageContent: homePage?.content || '',
         homeSections: homeSectionsService.get(),
+        heroSlides: getHeroSlides(),
         homeCategories: productsService.getHomeCategories(),
         latestNews: newsService.getPublishedNews().slice(0, 8),
         currentPage: homePage,

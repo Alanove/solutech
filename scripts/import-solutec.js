@@ -15,9 +15,7 @@ const PAGE_URLS = {
   350: '/contact-us',
   352: '/services',
   1731: '/products',
-  2: '/support',
-  1607: '/investor-relations',
-  1482: '/about-us/sustainability'
+  2: '/support'
 };
 
 function documentTitle(title, home) {
@@ -102,7 +100,7 @@ function main() {
 
   const unknown = new Set();
   const pages = {};
-  const pageOrder = [1470, 346, 1482, 350, 352, 1731, 2, 1607];
+  const pageOrder = [1470, 346, 350, 352, 1731, 2];
   pageOrder.forEach((id) => {
     if (!keep.has(`page:${id}`)) return;
     const post = postsById.get(id);

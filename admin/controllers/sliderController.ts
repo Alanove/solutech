@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AdminMenuService } from '../services/adminMenuService';
-import { SliderService } from '../services/sliderService';
+import { SliderService, Slide } from '../services/sliderService';
 import { SiteSettingsService } from '../services/siteSettingsService';
 import { StorageService } from '../services/storageService';
 
@@ -119,6 +119,11 @@ export class SliderController {
         
         // Add slide to service
         const newSlide = sliderService.addSlide(file.filename, alt.trim(), orderNumber, cleanTitle, cleanLink, cleanButtonText, cleanHeadline);
+        const extras: Partial<Slide> = {};
+        if (subtitle && String(subtitle).trim()) extras.subtitle = String(subtitle).trim();
+        if (link2 && String(link2).trim()) extras.link2 = String(link2).trim();
+        if (buttonText2 && String(buttonText2).trim()) extras.buttonText2 = String(buttonText2).trim();
+        sliderService.updateSlide(newSlide.id, extras);
         console.log('Slide created successfully:', newSlide);
         
         res.redirect('/admin/slider?success=Slide added successfully');

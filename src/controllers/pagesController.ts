@@ -114,7 +114,10 @@ export class PagesController {
    */
   public static newsCategory(req: Request, res: Response): void {
     const slug = String(req.params['slug'] || '');
-    const items = newsService.getPublishedNews().filter((item) => (item.category || '') === slug);
+    const items = newsService.getPublishedNews().filter((item) => {
+      const category = (item.category || '').trim();
+      return category === slug || (slug === 'news' && !category);
+    });
     const heading = slug === 'news' ? 'News' : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     PagesController.renderNewsList(req, res, items, heading, `/category/${slug}`);
   }

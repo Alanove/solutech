@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import type { Attachment } from 'nodemailer/lib/mailer';
+import { SiteSettingsService } from '../../admin/services/siteSettingsService';
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -10,14 +11,19 @@ export interface SendEmailOptions {
   attachments?: Attachment[];
 }
 
+interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  from: string;
+}
+
 export class EmailService {
   private static instance: EmailService;
   private transporter: nodemailer.Transporter | null = null;
-  private configured = false;
-
-  private constructor() {
-    this.initTransporter();
-  }
+  private transporterKey = '';
 
   public static getInstance(): EmailService {
     if (!EmailService.instance) {
@@ -26,55 +32,61 @@ export class EmailService {
     return EmailService.instance;
   }
 
-  private initTransporter(): void {
+  /**
+   * Admin → Site Settings takes priority; SMTP_* environment variables are the fallback.
+   */
+  private getConfig(): SmtpConfig | null {
+    const settings = SiteSettingsService.getInstance().getSmtpSettings();
+    if (settings.host) {
+      return settings;
+    }
+
     const host = process.env.SMTP_HOST?.trim();
+    if (!host) {
+      return null;
+    }
     const port = parseInt(process.env.SMTP_PORT || '587', 10);
-    const user = process.env.SMTP_USER?.trim();
-    const pass = process.env.SMTP_PASS?.trim();
-    const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+    return {
+      host,
+      port,
+      secure: process.env.SMTP_SECURE === 'true' || port === 465,
+      user: process.env.SMTP_USER?.trim() || '',
+      pass: process.env.SMTP_PASS?.trim() || '',
+      from: process.env.SMTP_FROM?.trim() || ''
+    };
+  }
 
-    if (host) {
+  private getTransporter(config: SmtpConfig): nodemailer.Transporter {
+    const key = JSON.stringify([config.host, config.port, config.secure, config.user, config.pass]);
+    if (!this.transporter || this.transporterKey !== key) {
       this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        auth: user && pass ? { user, pass } : undefined
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
+        auth: config.user && config.pass ? { user: config.user, pass: config.pass } : undefined
       });
-      this.configured = true;
-      return;
+      this.transporterKey = key;
     }
-
-    if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        '[EmailService] SMTP_HOST is not set — form emails will be logged only. Configure SMTP_* env vars for production.'
-      );
-    }
-
-    this.transporter = nodemailer.createTransport({ jsonTransport: true });
-    this.configured = false;
+    return this.transporter;
   }
 
   public isSmtpConfigured(): boolean {
-    return this.configured;
+    return this.getConfig() !== null;
   }
 
   public getDefaultFrom(): string {
-    return (
-      process.env.SMTP_FROM?.trim() ||
-      process.env.SMTP_USER?.trim() ||
-      'info@capitalpro.ca'
-    );
+    const config = this.getConfig();
+    const userAsEmail = config?.user.includes('@') ? config.user : '';
+    return config?.from || userAsEmail || SiteSettingsService.getInstance().getContactEmail().trim();
   }
 
   public async sendMail(
     options: SendEmailOptions
   ): Promise<{ messageId: string; delivered: boolean }> {
-    if (!this.transporter) {
-      throw new Error('Email transporter is not initialized');
-    }
+    const toList = Array.isArray(options.to) ? options.to : [options.to];
+    const config = this.getConfig();
 
-    if (!this.configured) {
-      const toList = Array.isArray(options.to) ? options.to : [options.to];
+    if (!config) {
       console.log('[EmailService] Form email (SMTP not configured):', {
         to: toList,
         subject: options.subject,
@@ -83,8 +95,7 @@ export class EmailService {
       return { messageId: 'logged', delivered: false };
     }
 
-    const toList = Array.isArray(options.to) ? options.to : [options.to];
-    const info = await this.transporter.sendMail({
+    const info = await this.getTransporter(config).sendMail({
       from: this.getDefaultFrom(),
       to: toList.join(', '),
       subject: options.subject,

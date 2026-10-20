@@ -218,6 +218,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   (res.locals as any).headerHtml = headerHtml;
   (res.locals as any).footerHtml = (chrome.footerHtml || '').replace(/(©|&copy;)\s*\d{4}/g, `$1${new Date().getFullYear()}`);
   (res.locals as any).latestNews = newsService.getPublishedNews().slice(0, 3);
+  (res.locals as any).recaptchaSiteKey = siteSettingsService.getRecaptchaSiteKey();
   next();
 });
 

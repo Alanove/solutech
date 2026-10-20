@@ -41,9 +41,40 @@ function jsonError(res: Response, status: number, message: string): void {
   res.status(status).json({ success: false, message });
 }
 
+async function verifyRecaptcha(token: string, remoteIp?: string): Promise<boolean> {
+  const secret = siteSettingsService.getRecaptchaSecretKey();
+  if (!secret || !token) {
+    return false;
+  }
+  try {
+    const params = new URLSearchParams({ secret, response: token });
+    if (remoteIp) {
+      params.append('remoteip', remoteIp);
+    }
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    });
+    const result = (await response.json()) as { success?: boolean };
+    return result.success === true;
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return false;
+  }
+}
+
 export class FormsController {
   public static async submitContact(req: Request, res: Response): Promise<void> {
     try {
+      if (!siteSettingsService.getRecaptchaSecretKey()) {
+        return jsonError(res, 503, 'The contact form is not available right now. Please email or call us directly.');
+      }
+      const recaptchaToken = trimField(req.body.recaptchaToken) || trimField(req.body['g-recaptcha-response']);
+      if (!(await verifyRecaptcha(recaptchaToken, req.ip))) {
+        return jsonError(res, 400, 'Spam protection check failed. Please try again.');
+      }
+
       const fname = trimField(req.body.fname);
       const lname = trimField(req.body.lname);
       const name = trimField(req.body.name) || [fname, lname].filter(Boolean).join(' ').trim();

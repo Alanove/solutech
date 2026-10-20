@@ -1,6 +1,7 @@
 <% const html = typeof pageContent !== 'undefined' ? pageContent : ''; %>
 <% const news = typeof latestNews !== 'undefined' ? latestNews : []; %>
 <% const sectionsData = typeof homeSections !== 'undefined' ? homeSections : null; %>
+<% const slides = typeof heroSlides !== 'undefined' ? heroSlides : []; %>
 <%
   function esc(value) {
     return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -26,10 +27,15 @@
   function renderSections(data) {
     const body = data.sections
       .filter(function(section) { return section.enabled !== false; })
-      .map(function(section) { return section.html || ''; })
+      .map(function(section) {
+        if (section.key === 'hero' && slides.length) {
+          return include('partials/home-slider', { slides: slides }).trim();
+        }
+        return section.html || '';
+      })
       .join('');
     return data.wrapperStart + body + data.wrapperEnd;
   }
   const output = sectionsData && sectionsData.sections.length ? renderSections(sectionsData) : html;
 %>
-<%- withNews(withCategories(output)) %>
+<%- include('partials/shortcodes', { content: withNews(withCategories(output)) }) %>

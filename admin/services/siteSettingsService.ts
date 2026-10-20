@@ -21,6 +21,14 @@ interface SiteSettings {
   portalCtaCaption?: string;
   investiaDisclaimer?: string;
   concernEmails?: Record<string, string>;
+  recaptchaSiteKey?: string;
+  recaptchaSecretKey?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpSecure?: boolean;
+  smtpUser?: string;
+  smtpPass?: string;
+  smtpFrom?: string;
   socialMedia: {
     facebook?: string;
     twitter?: string;
@@ -195,6 +203,36 @@ export class SiteSettingsService {
    */
   public getCareersEmail(): string {
     return this.loadSettings().careersEmail || '';
+  }
+
+  /**
+   * Get Google reCAPTCHA (v2 Invisible) site key, safe to expose to the browser
+   */
+  public getRecaptchaSiteKey(): string {
+    return (this.loadSettings().recaptchaSiteKey || '').trim();
+  }
+
+  /**
+   * Get Google reCAPTCHA secret key, server-side only
+   */
+  public getRecaptchaSecretKey(): string {
+    return (this.loadSettings().recaptchaSecretKey || '').trim();
+  }
+
+  /**
+   * Get outgoing mail (SMTP) settings, server-side only
+   */
+  public getSmtpSettings(): { host: string; port: number; secure: boolean; user: string; pass: string; from: string } {
+    const settings = this.loadSettings();
+    const port = Number(settings.smtpPort) || 465;
+    return {
+      host: (settings.smtpHost || '').trim(),
+      port,
+      secure: typeof settings.smtpSecure === 'boolean' ? settings.smtpSecure : port === 465,
+      user: (settings.smtpUser || '').trim(),
+      pass: (settings.smtpPass || '').trim(),
+      from: (settings.smtpFrom || '').trim()
+    };
   }
 
   /**

@@ -311,7 +311,7 @@ export class NewsController {
         const pageData: Omit<AdminNewsData, 'key'> & { key: string } = {
           key: key.trim(),
           title: title.trim(),
-          category: String(req.body.category || '').trim(),
+          category: String(req.body.category || '').trim() || 'news',
           url: pageUrl,
           content: content || '',
           status: (isActive ? 'published' : 'draft') as 'published' | 'draft',
@@ -646,7 +646,7 @@ export class NewsController {
         // Prepare update data - only include pageImage if it's a valid non-empty string
         const updateData: Partial<Omit<AdminNewsData, 'key'>> = {
           title: title.trim(),
-          category: String(req.body.category || '').trim(),
+          category: String(req.body.category || '').trim() || 'news',
           content: content || '',
           status: (isActive ? 'published' : 'draft') as 'published' | 'draft',
           includeInMenu: includeInMenu === '1' || includeInMenu === true,

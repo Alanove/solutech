@@ -92,6 +92,12 @@
 												The home page content is edited section by section in
 												<a href="/admin/home">Home Page</a>. This form only changes the title, status and SEO settings.
 											</div>
+											<% } else if (!isCreateMode && page.kind === 'products') { %>
+											<div class="alert alert-info mb-0">
+												This entry is the public Products page. It only controls the title, status and SEO settings.
+												Add and edit products under <a href="/admin/products">Products</a> and
+												<a href="/admin/product-categories">Product Categories</a>.
+											</div>
 											<% } else { %>
 											<textarea class="form-control rich-text" id="content" name="content" rows="8"
 												placeholder="Enter the page content in HTML format..."><%= page.content || '' %></textarea>
