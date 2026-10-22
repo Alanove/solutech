@@ -78,9 +78,24 @@ export class CatalogAdminService {
     this.writeCategories(data);
   }
 
-  deleteCategory(slug: string): void {
+  getProductsInCategory(slug: string): ProductRecord[] {
+    return this.getProducts().filter((product) => (product.categories || []).includes(slug));
+  }
+
+  deleteCategory(slug: string): boolean {
+    if (this.getProductsInCategory(slug).length > 0) return false;
     const data = this.readCategories();
     data.categories = data.categories.filter((category) => category.slug !== slug);
     this.writeCategories(data);
+    return true;
+  }
+
+  setCategoryStatus(slug: string, status: 'active' | 'hidden'): boolean {
+    const data = this.readCategories();
+    const category = data.categories.find((item) => item.slug === slug);
+    if (!category) return false;
+    category.status = status;
+    this.writeCategories(data);
+    return true;
   }
 }

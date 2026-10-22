@@ -9,6 +9,7 @@ export interface ProductCategory {
   image?: string;
   sort?: number;
   showOnHome?: boolean;
+  status?: 'active' | 'hidden';
 }
 
 export interface ProductRecord {
@@ -36,7 +37,9 @@ class ProductsService {
   getCategories(): ProductCategory[] {
     try {
       const data = JSON.parse(fs.readFileSync(DATA_PATHS.PRODUCT_CATEGORIES_FILE, 'utf8'));
-      return (data.categories || []).slice().sort((a: ProductCategory, b: ProductCategory) => (a.sort || 0) - (b.sort || 0));
+      return (data.categories || [])
+        .filter((category: ProductCategory) => category.status !== 'hidden')
+        .sort((a: ProductCategory, b: ProductCategory) => (a.sort || 0) - (b.sort || 0));
     } catch {
       return [];
     }

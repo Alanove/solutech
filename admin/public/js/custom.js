@@ -620,6 +620,77 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+function initCategoryDeleteModal() {
+  const modalEl = document.getElementById('deleteCategoryModal');
+  if (!modalEl) {
+    return;
+  }
+
+  const emptySection = document.getElementById('deleteCategoryEmpty');
+  const inUseSection = document.getElementById('deleteCategoryInUse');
+  const titleEl = document.getElementById('deleteCategoryTitle');
+  const countEl = document.getElementById('deleteCategoryCount');
+  const listEl = document.getElementById('deleteCategoryProducts');
+  const hideHint = document.getElementById('deleteCategoryHideHint');
+  const deleteForm = document.getElementById('deleteCategoryForm');
+  const hideForm = document.getElementById('hideCategoryForm');
+  const maxListed = 10;
+
+  document.querySelectorAll('.js-delete-category').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const slug = button.dataset.categorySlug || '';
+      const name = button.dataset.categoryName || slug;
+      const count = parseInt(button.dataset.productCount || '0', 10) || 0;
+      const isHidden = button.dataset.status === 'hidden';
+      let products = [];
+      try {
+        products = JSON.parse(button.dataset.products || '[]');
+      } catch (e) {
+        products = [];
+      }
+
+      modalEl.querySelectorAll('.js-category-name').forEach(function (el) {
+        el.textContent = name;
+      });
+      const base = '/admin/product-categories/' + encodeURIComponent(slug);
+      deleteForm.action = base + '/delete';
+      hideForm.action = base + '/status';
+
+      if (count === 0) {
+        titleEl.textContent = 'Delete category';
+        emptySection.classList.remove('d-none');
+        inUseSection.classList.add('d-none');
+        deleteForm.classList.remove('d-none');
+        hideForm.classList.add('d-none');
+      } else {
+        titleEl.textContent = 'Category cannot be deleted';
+        emptySection.classList.add('d-none');
+        inUseSection.classList.remove('d-none');
+        deleteForm.classList.add('d-none');
+        hideForm.classList.toggle('d-none', isHidden);
+        hideHint.classList.toggle('d-none', isHidden);
+        countEl.textContent = String(count);
+        listEl.innerHTML = '';
+        products.slice(0, maxListed).forEach(function (title) {
+          const li = document.createElement('li');
+          li.textContent = title;
+          listEl.appendChild(li);
+        });
+        if (products.length > maxListed) {
+          const more = document.createElement('li');
+          more.className = 'text-muted';
+          more.textContent = 'and ' + (products.length - maxListed) + ' more';
+          listEl.appendChild(more);
+        }
+      }
+
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initCategoryDeleteModal);
+
 document.addEventListener('DOMContentLoaded', function () {
   const devLoginBtn = document.getElementById('dev-login-btn');
   if (!devLoginBtn) {

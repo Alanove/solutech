@@ -104,6 +104,7 @@ router.get('/product-categories', AdminController.requireAuth, CatalogController
 router.get('/product-categories/:slug/edit', AdminController.requireAuth, CatalogController.editCategory);
 router.post('/product-categories/save', AdminController.requireAuth, CatalogController.saveCategory);
 router.post('/product-categories/:slug/delete', AdminController.requireAuth, CatalogController.deleteCategory);
+router.post('/product-categories/:slug/status', AdminController.requireAuth, CatalogController.setCategoryStatus);
 
 // Testimonials
 router.get('/testimonials', AdminController.requireAuth, TestimonialsController.list);

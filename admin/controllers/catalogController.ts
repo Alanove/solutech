@@ -125,10 +125,16 @@ export class CatalogController {
   }
 
   public static categories(req: Request, res: Response): void {
+    const categories = catalog.getCategories();
+    const productsByCategory: Record<string, string[]> = {};
+    categories.forEach((category) => {
+      productsByCategory[category.slug] = catalog.getProductsInCategory(category.slug).map((product) => product.title);
+    });
     res.render('products/categories', {
       title: 'Product categories',
       pageTitle: 'Product categories',
-      categories: catalog.getCategories(),
+      categories,
+      productsByCategory,
       success: req.query['success'],
       error: req.query['error']
     });
@@ -173,14 +179,27 @@ export class CatalogController {
         description: String(body.description || ''),
         image,
         sort: Number(body.sort || 0),
-        showOnHome: body.showOnHome === '1'
+        showOnHome: body.showOnHome === '1',
+        status: body.status === 'hidden' ? 'hidden' : 'active'
       });
       res.redirect('/admin/product-categories?success=Saved');
     });
   }
 
   public static deleteCategory(req: Request, res: Response): void {
-    catalog.deleteCategory(String(req.params['slug'] || ''));
+    if (!catalog.deleteCategory(String(req.params['slug'] || ''))) {
+      res.redirect(`/admin/product-categories?error=${encodeURIComponent('Category has products and cannot be deleted. Move the products or hide the category instead.')}`);
+      return;
+    }
     res.redirect('/admin/product-categories?success=Deleted');
+  }
+
+  public static setCategoryStatus(req: Request, res: Response): void {
+    const status = req.body?.status === 'hidden' ? 'hidden' : 'active';
+    if (!catalog.setCategoryStatus(String(req.params['slug'] || ''), status)) {
+      res.redirect('/admin/product-categories?error=Category not found');
+      return;
+    }
+    res.redirect(`/admin/product-categories?success=${status === 'hidden' ? 'Category hidden' : 'Category visible'}`);
   }
 }
